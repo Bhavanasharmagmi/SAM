@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Mills SAM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gm-blue: #00479d;
+            --gm-red: #da291c;
+            --light-blue: #eef5ff;
+            --border-color: #dee2e6;
+            --text-dark: #212529;
+            --text-light: #495057;
+            --success-green: #198754;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+            --gray-bg: #f8f9fa;
+        }
+         .indian-flag {
+            display: inline-block;
+            width: 20px;
+            height: 14px;
+            background: linear-gradient(to bottom, #ff9933 33.33%, white 33.33%, white 66.66%, #138808 66.66%);
+            border-radius: 2px;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--gray-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0;
+        }
+
+        .header {
+            background-color: var(--gm-blue);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+            border-bottom: 5px solid var(--gm-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .gm-logo {
+            width: 70px;
+            height: 90px;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            text-align: left;
+        }
+        
+        .header-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 4px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-content .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .location-badge {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .main-container {
+            background: #ffffff;
+            padding: 30px;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .content-card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--light-blue);
+            color: var(--gm-blue);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 1rem; }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+        
+        .brand-showcase {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--gray-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .brand-item {
+            text-align: center;
+            transition: transform 0.2s ease-out;
+        }
+        
+        .brand-item:hover {
+            transform: scale(1.1);
+        }
+        
+        .brand-item img {
+            height: 45px;
+            max-width: 100px;
+            object-fit: contain;
+            filter: grayscale(20%);
+            opacity: 0.8;
+        }
+        
+        .brand-item p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gm-blue);
+            box-shadow: 0 0 0 3px rgba(0, 71, 157, 0.2);
+        }
+        
+        .region-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .region-option input[type="radio"] { display: none; }
+        .region-option label {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;
+            cursor: pointer; transition: all 0.2s ease; font-weight: 500;
+        }
+        .region-option input[type="radio"]:checked + label {
+            background: var(--gm-blue); color: white; border-color: var(--gm-blue);
+        }
+        .region-option label:hover { border-color: var(--gm-blue); }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-color); border-radius: 12px; padding: 25px;
+            text-align: center; transition: all 0.2s ease; cursor: pointer;
+        }
+        .file-upload-area:hover, .file-upload-area.drag-over {
+            border-color: var(--gm-blue); background: var(--light-blue);
+        }
+        .file-upload-area i { font-size: 2.5rem; color: var(--gm-blue); margin-bottom: 10px; }
+        .file-upload-area p { margin: 0; color: var(--text-light); }
+        .file-upload-area input[type="file"] { display: none; }
+        
+        .uploaded-file {
+            background: var(--light-blue); border: 1px solid var(--gm-blue); border-radius: 8px;
+            padding: 12px 15px; margin-top: 15px; display: none; align-items: center;
+        }
+        .uploaded-file.show { display: flex; }
+        .uploaded-file i { color: var(--gm-blue); margin-right: 10px; }
+        #removeFile {
+            margin-left: auto; background: none; border: none; color: var(--danger-red);
+            cursor: pointer; font-size: 1.2rem;
+        }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 20px; }
+        .btn {
+            flex-grow: 1; padding: 14px 20px; border: none; border-radius: 8px; font-size: 1rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { background: var(--gm-blue); color: white; }
+        .btn-primary:hover:not(:disabled) { background: #003a7a; }
+        .btn-danger { background: var(--danger-red); color: white; }
+        .btn-danger:hover:not(:disabled) { background: #b02118; }
+        .btn:disabled { background-color: #6c757d; cursor: not-allowed; opacity: 0.7; }
+
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--text-light); }
+        .feature-list li i { color: var(--success-green); width: 20px; }
+
+        .status-box { display: flex; align-items: center; gap: 15px; }
+        .status-indicator {
+            padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;
+            font-weight: 600; text-transform: uppercase;
+        }
+        .status-idle { background-color: #6c757d; color: white; }
+        .status-running { background-color: var(--success-green); color: white; animation: pulse 1.5s infinite; }
+        .status-error { background-color: var(--danger-red); color: white; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); } 100% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); } }
+
+        .progress-and-logs-card {
+            margin-top: 30px; display: none;
+            background-color: #2a2d32; border-radius: 12px; overflow: hidden;
+        }
+        .progress-and-logs-card.show { display: block; }
+        .logs-header-bar {
+            padding: 15px 25px; background-color: #343a40;
+            display: flex; justify-content: space-between; align-items: center; color: white;
+        }
+        .logs-title { font-weight: 600; font-size: 1.1rem; }
+        .clear-logs-btn {
+            background: #495057; color: white; padding: 8px 12px; border: none;
+            border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: background 0.2s ease;
+        }
+        .clear-logs-btn:hover { background: #6c757d; }
+
+        .progress-section { padding: 25px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; color: #f8f9fa; margin-bottom: 15px; }
+        #progressPercent { font-size: 1.5rem; font-weight: 700; }
+        .progress-bar-container { background: rgba(0, 0, 0, 0.2); border-radius: 25px; height: 10px; overflow: hidden; }
+        .progress-bar { background: var(--success-green); height: 100%; border-radius: 25px; transition: width 0.3s ease; width: 0%; }
+        
+        .progress-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+        .stat-item { background: #343a40; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 1.6rem; font-weight: 700; color: white; }
+        .stat-label { font-size: 0.8rem; color: #adb5bd; margin-top: 5px; text-transform: uppercase; }
+        
+        #logsContainer {
+            padding: 10px 25px 25px 25px; max-height: 400px; overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
+        }
+        .log-entry { padding: 6px 0; border-bottom: 1px solid #495057; display: flex; }
+        .log-entry:last-child { border-bottom: none; }
+        .log-timestamp { color: #8d96a0; margin-right: 15px; }
+        .log-message.info { color: #8ab4f8; }
+        .log-message.warning { color: var(--warning-yellow); }
+        .log-message.error { color: var(--danger-red); }
+        .log-message.default { color: #ced4da; }
+        
+        .footer { text-align: center; padding: 25px; color: var(--text-light); font-size: 0.9rem; }
+
+        .failed-bmns-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            color: var(--text-light);
+        }
+
+        .failed-bmns-list li {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .failed-bmns-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .duplicates-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .duplicate-group h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .duplicates-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .duplicates-list li {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .duplicates-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .restricted-bmns-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            color: var(--text-light);
+        }
+
+        .restricted-bmns-list li {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .restricted-bmns-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 992px) { 
+            .main-grid { grid-template-columns: 1fr; }
+            .region-selector { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .container { margin: 0; border-radius: 0; }
+            .header { border-radius: 0; flex-direction: column; text-align: center; gap: 10px; padding: 20px; }
+            .location-badge { position: static; margin-top: 10px; }
+            .main-container { padding: 20px; border-radius: 0; }
+            .btn-group { flex-direction: column; }
+            .region-selector { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="{{ url_for('static', filename='img/gm_logo.png') }}" alt="General Mills Logo" class="gm-logo">
+            <div class="header-content">
+                <p>General Mills India</p>
+                <div class="tagline">Making Food The World Loves</div>
+                <h5 style="margin-top: 1%;">Smart Asset Mover</h5>
+            </div>
+            <div class="location-badge">
+                <span class="indian-flag"></span>
+                Mumbai, India
+            </div>
+        </header>
+
+        <main class="main-container">
+            <div class="main-grid">
+                <!-- Left Column: Configuration -->
+                <div class="left-column">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-cog"></i></div>
+                            <h2 class="card-title">Configuration</h2>
+                        </div>
+                        <form id="downloadForm">
+                            <div class="form-group">
+                                <label for="retailer">Select Retailer</label>
+                                <div class="region-selector">
+                                    <div class="region-option">
+                                        <input type="radio" id="sobeys" name="retailer" value="Sobeys" checked>
+                                        <label for="sobeys"><i class="fas fa-store"></i> Sobeys</label>
+                                    </div>
+                                    <div class="region-option">
+                                        <input type="radio" id="instacart" name="retailer" value="Instacart">
+                                        <label for="instacart"><i class="fas fa-shopping-cart"></i> Instacart</label>
+                                    </div>
+                                    <div class="region-option">
+                                        <input type="radio" id="both" name="retailer" value="Both">
+                                        <label for="both"><i class="fas fa-exchange-alt"></i> Both</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sobeys Input Fields -->
+                            <div class="form-group retailer-specific" id="sobeysFields">
+                                <label for="bmn">BMN</label>
+                                <input type="text" id="bmn" name="bmn" class="form-control" placeholder="e.g., 12345">
+                                <label for="articleId">Article ID</label>
+                                <input type="text" id="articleId" name="article_id" class="form-control" placeholder="e.g., 67890">
+                            </div>
+
+                            <!-- Instacart Input Fields -->
+                            <div class="form-group retailer-specific" id="instacartFields" style="display: none;">
+                                <label for="search_id">BMN</label>
+                                <input type="text" id="searchId" name="bmn" class="form-control" placeholder="e.g., 12345">
+                                <label for="gtin">GTIN</label>
+                                <input type="text" id="gtin" name="gtin" class="form-control" placeholder="e.g., 67890">
+                            </div>
+
+                            <!-- Both Retailers Input Fields -->
+                            <div class="form-group retailer-specific" id="bothFields" style="display: none;">
+                                <label for="bmnBoth">BMN</label>
+                                <input type="text" id="bmnBoth" name="bmn" class="form-control" placeholder="e.g., 12345">
+                                <label for="articleIdBoth">Article ID</label>
+                                <input type="text" id="articleIdBoth" name="article_id" class="form-control" placeholder="e.g., 67890">
+                                <label for="gtinBoth">GTIN</label>
+                                <input type="text" id="gtinBoth" name="gtin" class="form-control" placeholder="e.g., 54321">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Or Upload File (Batch)</label>
+                                <div class="file-upload-area" id="fileUploadArea">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p><strong>Click to upload file</strong></p>
+                                    <p>Supports .txt, .csv, .xlsx, .xls</p> <!-- Updated to include Excel formats -->
+                                    <input type="file" id="fileInput" name="file" accept=".txt,.csv,.xlsx,.xls"> <!-- Updated accept attribute -->
+                                </div>
+                                <div class="uploaded-file" id="uploadedFile">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" id="removeFile"><i class="fas fa-times-circle"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary" id="startBtn">
+                                    <i class="fas fa-play"></i> Start
+                                </button>
+                                <button type="button" class="btn btn-danger" id="stopBtn" disabled>
+                                    <i class="fas fa-stop"></i> Stop
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Features & Status -->
+                <div class="right-column">
+                    <div class="card-header">
+                        <div class="card-icon" style="margin-top: 3%;"><i class="fas fa-star"></i></div>
+                        <h3 class="card-title">Our Brands </h3>
+                    </div>
+                    <div class="brand-showcase" style="margin-bottom: 3%;">
+                        <div class="brand-item">
+                            <img src="{{ url_for('static', filename='img/pillsbury_logo.png') }}" alt="Pillsbury Logo">
+                            <p>Pillsbury</p>
+                        </div>
+                        <div class="brand-item">
+                            <img src="{{ url_for('static', filename='img/haagen-dazs_logo.png') }}" alt="Häagen-Dazs Logo">
+                            <p>Häagen-Dazs</p>
+                        </div>
+                        <div class="brand-item">
+                            <img src="{{ url_for('static', filename='img/betty_crocker_logo.png') }}" alt="Betty Crocker Logo">
+                            <p>Betty Crocker</p>
+                        </div>
+                        <div class="brand-item">
+                            <img src="{{ url_for('static', filename='img/nature_valley_logo.png') }}" alt="Nature Valley Logo">
+                            <p>Nature Valley</p>
+                        </div>
+                    </div>
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <h2 class="card-title">System Status</h2>
+                        </div>
+                        <div class="status-box">
+                            <div class="status-indicator status-idle" id="statusIndicator">Idle</div>
+                            <strong id="statusText">System is ready.</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="content-card" style="margin-top: 3%;">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-star"></i></div>
+                            <h2 class="card-title">Features</h2>
+                        </div>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check-circle"></i> Batch download support via file upload</li>
+                            <li><i class="fas fa-check-circle"></i> Sobeys & Instacart retailer support</li>
+                            <li><i class="fas fa-check-circle"></i> Real-time progress and logging</li>
+                            <li><i class="fas fa-check-circle"></i> Start and stop functionality</li>
+                            <li><i class="fas fa-check-circle"></i> Automatic folder organization</li>
+                            <li><i class="fas fa-check-circle"></i> Clean, responsive interface</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress and Logs Card -->
+            <div class="progress-and-logs-card" id="progressCard">
+                <div class="logs-header-bar">
+                    <span class="logs-title"><i class="fas fa-terminal"></i> Execution Log</span>
+                    <button class="clear-logs-btn" onclick="clearLogs()">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span id="currentTask">Waiting...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalItems">0</div>
+                            <div class="stat-label">Total Items</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="completedItems">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="remainingItems">0</div>
+                            <div class="stat-label">Remaining</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="currentSearchId">-</div>
+                            <div class="stat-label">Current ID</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="logsContainer"></div>
+            </div>
+
+            <!-- Failed BMNs Section -->
+            <div class="failed-bmns-section">
+                <div class="logs-header-bar">
+                    <span class="logs-title">
+                        <i class="fas fa-exclamation-circle"></i> Image not found in MOJO (<span id="failedBMNsCount">0</span>)
+                    </span>
+                    <button class="clear-logs-btn" onclick="clearFailedBMNs()">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <ul id="failedBMNsList" class="failed-bmns-list">
+                    <li>No BMNs to display</li>
+                </ul>
+            </div>
+
+            <!-- Restricted BMNs Section -->
+            <div class="restricted-bmns-section" style="margin-top: 20px;">
+                <div class="logs-header-bar">
+                    <span class="logs-title"><i class="fas fa-lock"></i> Restricted Images (<span id="restrictedBMNsCount">0</span>)</span>
+                    <button class="clear-logs-btn" onclick="clearRestrictedBMNs()">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <ul id="restrictedBMNsList" class="restricted-bmns-list">
+                    <li>No restricted BMNs to display</li>
+                </ul>
+            </div>
+
+            <!-- Duplicate Entries Section -->
+            <div class="content-card" id="duplicatesCard" style="display: none; margin-top: 30px;">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-clone"></i></div>
+                    <h2 class="card-title">Duplicate Entries</h2>
+                </div>
+                <div class="duplicates-section">
+                    <div class="duplicate-group">
+                        <h4>Duplicate BMNs (<span id="duplicateBMNsCount">0</span>)</h4>
+                        <ul id="duplicateBMNsList" class="duplicates-list">
+                            <li>No duplicates found</li>
+                        </ul>
+                    </div>
+                    <div class="duplicate-group">
+                        <h4>Duplicate Article IDs (<span id="duplicateArticleIDsCount">0</span>)</h4>
+                        <ul id="duplicateArticleIDsList" class="duplicates-list">
+                            <li>No duplicates found</li>
+                        </ul>
+                    </div>
+                    <div class="duplicate-group">
+                        <h4>Duplicate GTINs (<span id="duplicateGTINsCount">0</span>)</h4>
+                        <ul id="duplicateGTINsList" class="duplicates-list">
+                            <li>No duplicates found</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2024 General Mills | Digital Innovation & Technology</p>
+        </footer>
+    </div>
+
+        <script>
+        // Socket.IO connection
+        const socket = io();
+        let isConnected = false;
+
+        // DOM elements
+        const downloadForm = document.getElementById('downloadForm');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const progressCard = document.getElementById('progressCard');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadedFile = document.getElementById('uploadedFile');
+        const fileName = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+        const logsContainer = document.getElementById('logsContainer');
+
+        // Status elements
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Progress elements
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const currentTask = document.getElementById('currentTask');
+        const totalItems = document.getElementById('totalItems');
+        const completedItems = document.getElementById('completedItems');
+        const remainingItems = document.getElementById('remainingItems');
+        const currentSearchId = document.getElementById('currentSearchId');
+
+        // DOM element for failed BMNs list
+        const failedBMNsList = document.getElementById('failedBMNsList');
+
+        // DOM elements for duplicates
+        const duplicatesCard = document.getElementById('duplicatesCard');
+        const duplicateBMNsList = document.getElementById('duplicateBMNsList');
+        const duplicateArticleIDsList = document.getElementById('duplicateArticleIDsList');
+        const duplicateGTINsList = document.getElementById('duplicateGTINsList');
+
+        // DOM element for restricted BMNs list
+        const restrictedBMNsList = document.getElementById('restrictedBMNsList');
+
+        // Socket event handlers
+        socket.on('connect', () => {
+            isConnected = true;
+            if (connectionStatus) {
+                connectionStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success-green);"></i> Connected';
+            }
+            socket.emit('get_logs');
+        });
+
+        socket.on('disconnect', () => {
+            isConnected = false;
+            if (connectionStatus) {
+                connectionStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--warning-yellow);"></i> Disconnected';
+            }
+        });
+
+        socket.on('log', (logEntry) => addLogEntry(logEntry));
+
+        socket.on('logs', (logs) => {
+            clearLogs();
+            if (logs && logs.length > 0) {
+                logs.forEach(log => addLogEntry(log));
+            } else {
+                addLogEntry({ timestamp: new Date().toLocaleTimeString(), message: 'Log history empty. Ready for new process.', level: 'info' });
+            }
+        });
+
+        socket.on('progress', (data) => {
+            // Update progress bar and task
+            updateProgress(data.progress, data.task);
+
+            // Update completed and remaining items
+            completedItems.textContent = data.completed;
+            remainingItems.textContent = data.remaining;
+        });
+        socket.on('item_completed', (data) => updateStats(data.completed, data.total, data.search_id));
+        socket.on('execution_complete', () => {
+            setExecutionState(false);
+            updateStatus('idle', 'Process Completed');
+            updateProgress(100, "All tasks finished.");
+        });
+        socket.on('execution_stopped', () => {
+            setExecutionState(false);
+            updateStatus('idle', 'Process Stopped');
+        });
+        socket.on('execution_summary', (data) => {
+            const failedBMNs = data.failed_bmns || [];
+            const restrictedBMNs = data.restricted_bmns || [];
+            populateFailedBMNs(failedBMNs);
+            populateRestrictedBMNs(restrictedBMNs);
+
+            if (failedBMNs.length > 0) {
+                addLogEntry({
+                    timestamp: new Date().toLocaleTimeString(),
+                    message: `BMNs with no assets found: ${failedBMNs.join(', ')}`,
+                    level: 'warning'
+                });
+            }
+
+            if (restrictedBMNs.length > 0) {
+                addLogEntry({
+                    timestamp: new Date().toLocaleTimeString(),
+                    message: `BMNs with restricted assets: ${restrictedBMNs.join(', ')}`,
+                    level: 'warning'
+                });
+            }
+        });
+
+        socket.on('status_update', (data) => {
+            // Update the "Not in Mojo" and "Restricted BMNs" sections
+            const notInMojoList = document.getElementById('failedBMNsList');
+            const restrictedList = document.getElementById('restrictedBMNsList');
+
+            // Clear existing lists
+            notInMojoList.innerHTML = '';
+            restrictedList.innerHTML = '';
+
+            // Populate "Not in Mojo" list
+            if (data.not_in_mojo_bmns.length > 0) {
+                data.not_in_mojo_bmns.forEach((bmn) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = bmn;
+                    notInMojoList.appendChild(listItem);
+                });
+            } else {
+                notInMojoList.innerHTML = '<li>No BMNs to display</li>';
+            }
+
+            // Populate "Restricted BMNs" list
+            if (data.restricted_bmns.length > 0) {
+                data.restricted_bmns.forEach((bmn) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = bmn;
+                    restrictedList.appendChild(listItem);
+                });
+            } else {
+                restrictedList.innerHTML = '<li>No restricted BMNs to display</li>';
+            }
+
+            // Update counts
+            document.getElementById('failedBMNsCount').textContent = data.not_in_mojo_bmns.length;
+            document.getElementById('restrictedBMNsCount').textContent = data.restricted_bmns.length;
+        });
+
+        // File upload handling
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileUploadArea.addEventListener('dragover', (e) => { e.preventDefault(); fileUploadArea.classList.add('drag-over'); });
+        fileUploadArea.addEventListener('dragleave', () => fileUploadArea.classList.remove('drag-over'));
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault(); fileUploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFileSelect(e.target.files[0]); });
+        removeFileBtn.addEventListener('click', () => { fileInput.value = ''; uploadedFile.classList.remove('show'); });
+
+        function handleFileSelect(file) {
+            fileName.textContent = file.name;
+            uploadedFile.classList.add('show');
+            // Clear single-input fields when a file is selected
+            document.querySelectorAll('.retailer-specific input[type="text"]').forEach(input => input.value = '');
+        }
+
+        // Form submission
+        downloadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(downloadForm);
+            const retailer = formData.get('retailer');
+            const hasFile = fileInput.files.length > 0;
+
+            // Validation Logic
+            if (!hasFile) {
+                let hasInput = false;
+                let isInputValid = true;
+                if (retailer === 'Sobeys') {
+                    hasInput = formData.get('bmn') && formData.get('article_id');
+                    isInputValid = hasInput;
+                } else if (retailer === 'Instacart') {
+                    hasInput = formData.get('bmn') && formData.get('gtin'); // Correct field names
+                    isInputValid = hasInput;
+                } else if (retailer === 'Both') {
+                    hasInput = formData.get('bmn') && formData.get('article_id') && formData.get('gtin');
+                    isInputValid = hasInput;
+                }
+
+                if (!hasInput) {
+                    alert('Please either fill in all required fields for the selected retailer or upload a file.');
+                    return;
+                }
+                if (!isInputValid) {
+                    alert('Please fill in ALL required fields for the selected retailer.');
+                    return;
+                }
+            }
+            
+            if (hasFile && Array.from(formData.values()).some(val => typeof val === 'string' && val.trim() !== '' && val !== retailer)) {
+                 const textInputs = document.querySelectorAll('.retailer-specific input[type="text"]');
+                 let hasText = false;
+                 textInputs.forEach(input => {
+                     if(!input.disabled && input.value.trim() !== '') {
+                         hasText = true;
+                     }
+                 });
+                 if(hasText){
+                    alert('Please use either single input fields or file upload, not both.');
+                    return;
+                 }
+            }
+            
+            // Proceed with form submission
+            try {
+                setExecutionState(true);
+                updateStatus('running', 'Starting...');
+                progressCard.classList.add('show');
+                clearLogs();
+                addLogEntry({ timestamp: new Date().toLocaleTimeString(), message: 'Initializing process...', level: 'info' });
+
+                const response = await fetch('/execute', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const total = result.total_items || (isInputValid ? 1 : 0);
+                    totalItems.textContent = total;
+                    completedItems.textContent = '0';
+                    remainingItems.textContent = total;
+                    currentSearchId.textContent = formData.get('bmn') || formData.get('search_id') || '-';
+                    updateProgress(0, 'Initializing...');
+
+                    // Populate duplicates
+                    populateDuplicates(result.duplicates || {});
+                } else {
+                    throw new Error(result.error || 'Failed to start execution.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addLogEntry({ timestamp: new Date().toLocaleTimeString(), message: `Error: ${error.message}`, level: 'error' });
+                setExecutionState(false);
+                updateStatus('error', 'Error');
+            }
+        });
+
+        // Stop button
+        stopBtn.addEventListener('click', async () => {
+            try { await fetch('/stop', { method: 'POST' }); } catch (error) {
+                addLogEntry({ timestamp: new Date().toLocaleTimeString(), message: `Error sending stop signal: ${error.message}`, level: 'error' });
+            }
+        });
+
+        // Clear the failed BMNs list
+        function clearFailedBMNs() {
+            failedBMNsList.innerHTML = '<li>No BMNs to display</li>';
+        }
+
+        // Populate the failed BMNs list
+        function populateFailedBMNs(failedBMNs) {
+            clearFailedBMNs();
+            const count = failedBMNs.length;
+            document.getElementById('failedBMNsCount').textContent = count;
+
+            if (count > 0) {
+                failedBMNsList.innerHTML = ''; // Clear the placeholder
+                failedBMNs.forEach(bmn => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = bmn;
+                    failedBMNsList.appendChild(listItem);
+                });
+            }
+        }
+
+        // Clear the restricted BMNs list
+        function clearRestrictedBMNs() {
+            restrictedBMNsList.innerHTML = '<li>No restricted BMNs to display</li>';
+        }
+
+        // Populate the restricted BMNs list
+        function populateRestrictedBMNs(restrictedBMNs) {
+            clearRestrictedBMNs();
+            const count = restrictedBMNs.length;
+            document.getElementById('restrictedBMNsCount').textContent = count;
+
+            if (count > 0) {
+                restrictedBMNsList.innerHTML = ''; // Clear the placeholder
+                restrictedBMNs.forEach(bmn => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = bmn;
+                    restrictedBMNsList.appendChild(listItem);
+                });
+            }
+        }
+
+        // Function to populate duplicates
+        function populateDuplicates(duplicates) {
+            // Clear existing duplicates
+            duplicateBMNsList.innerHTML = '<li>No duplicates found</li>';
+            duplicateArticleIDsList.innerHTML = '<li>No duplicates found</li>';
+            duplicateGTINsList.innerHTML = '<li>No duplicates found</li>';
+
+            // Update counts
+            const bmnCount = duplicates.duplicate_bmns ? duplicates.duplicate_bmns.length : 0;
+            const articleIdCount = duplicates.duplicate_article_ids ? duplicates.duplicate_article_ids.length : 0;
+            const gtinCount = duplicates.duplicate_gtins ? duplicates.duplicate_gtins.length : 0;
+
+            document.getElementById('duplicateBMNsCount').textContent = bmnCount;
+            document.getElementById('duplicateArticleIDsCount').textContent = articleIdCount;
+            document.getElementById('duplicateGTINsCount').textContent = gtinCount;
+
+            // Populate BMNs
+            if (bmnCount > 0) {
+                duplicateBMNsList.innerHTML = '';
+                duplicates.duplicate_bmns.forEach(bmn => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = bmn;
+                    duplicateBMNsList.appendChild(listItem);
+                });
+            }
+
+            // Populate Article IDs
+            if (articleIdCount > 0) {
+                duplicateArticleIDsList.innerHTML = '';
+                duplicates.duplicate_article_ids.forEach(articleId => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = articleId;
+                    duplicateArticleIDsList.appendChild(listItem);
+                });
+            }
+
+            // Populate GTINs
+            if (gtinCount > 0) {
+                duplicateGTINsList.innerHTML = '';
+                duplicates.duplicate_gtins.forEach(gtin => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = gtin;
+                    duplicateGTINsList.appendChild(listItem);
+                });
+            }
+
+            // Show the duplicates card
+            duplicatesCard.style.display = 'block';
+        }
+
+        // Helper functions
+        function addLogEntry(logEntry) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'log-entry';
+            const time = logEntry.timestamp || new Date().toLocaleTimeString();
+            const level = logEntry.level || 'default';
+            logDiv.innerHTML = `<span class="log-timestamp">[${time}]</span><span class="log-message ${level}">${logEntry.message}</span>`;
+            logsContainer.appendChild(logDiv);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function clearLogs() { logsContainer.innerHTML = ''; }
+        function updateProgress(progress, task) {
+            const p = Math.round(progress);
+            progressBar.style.width = p + '%';
+            progressPercent.textContent = p + '%';
+            currentTask.textContent = task;
+        }
+
+        function updateStats(completed, total, search_id) {
+            completedItems.textContent = completed;
+            remainingItems.textContent = total - completed;
+            currentSearchId.textContent = search_id || '-';
+        }
+
+        function setExecutionState(running) {
+            startBtn.disabled = running;
+            stopBtn.disabled = !running;
+            // Disable all form elements except the stop button during execution
+            downloadForm.querySelectorAll('input, button').forEach(el => {
+                if (el.id !== 'stopBtn') {
+                    el.disabled = running;
+                }
+            });
+            fileUploadArea.style.pointerEvents = running ? 'none' : 'auto';
+            fileUploadArea.style.opacity = running ? '0.6' : '1';
+        }
+
+        function updateStatus(status, text) {
+            statusIndicator.className = `status-indicator status-${status}`;
+            statusText.textContent = text;
+        }
+
+        // *** MODIFIED SECTION ***
+        // Function to toggle and enable/disable retailer fields
+        function toggleRetailerFields(selectedValue) {
+            const allFieldsets = document.querySelectorAll('.retailer-specific');
+            
+            allFieldsets.forEach(fieldset => {
+                const inputs = fieldset.querySelectorAll('input');
+                // Check if this is the fieldset we want to show
+                if (fieldset.id === `${selectedValue.toLowerCase()}Fields`) {
+                    fieldset.style.display = 'block';
+                    inputs.forEach(input => input.disabled = false); // Enable inputs
+                } else {
+                    fieldset.style.display = 'none';
+                    inputs.forEach(input => input.disabled = true); // Disable inputs
+                }
+            });
+        }
+        
+        // Add event listeners and initialize
+        document.querySelectorAll('input[name="retailer"]').forEach(radio => {
+            radio.addEventListener('change', (e) => toggleRetailerFields(e.target.value));
+        });
+
+        // Initialize the view on page load
+        const initialRetailer = document.querySelector('input[name="retailer"]:checked').value;
+        toggleRetailerFields(initialRetailer);
+        
+    </script>
+</body>
+</html>
